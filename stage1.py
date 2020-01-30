@@ -38,14 +38,23 @@ class stage1:
         self.Stream=self.add_song(self.podcast_file)
         print(self.Stream.get_combined_audio_file())
         print("Stream Ready")
+        print(self.Stream.get_combined_array())
+        print("the new array above does it work?")
 ################################################################################
     def create_list_song(self):
         arr=[]
         total=0
         while total <15:
-            music=songs()
-            arr.append(music)
-            total=total+music.length()
+            try:
+                music=songs()
+                arr.append(music)
+                total=total+music.length()
+            except:
+                music.set_new_song()
+                print(music.get_song_name())
+                arr[len(arr)-1]=music
+                total=total+music.length()
+
         print("music list Ready")
         print("-"*80)
         return arr

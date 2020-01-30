@@ -7,7 +7,9 @@ features:
     Slience ie blank in audio
     Repeated sounds,
     ad placement.
-    
+
+Use hello internet as a start as train and test
+then use Twp to validate the model
 
 
 

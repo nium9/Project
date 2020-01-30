@@ -14,7 +14,8 @@ class Combined:
     def __init__(self):
         self.combined_audio_file= pydub.AudioSegment.empty()
         self.combined_dictionary={}
-        #may need to change in array and a dictionary inside each element  
+        self.combined_array=[]
+        #may need to change in array and a dictionary inside each element
         ##self.chapter_array=[]
 ###########################################################
 #           Getters
@@ -25,8 +26,10 @@ class Combined:
     def set_combined_audio_file(self,podcast_sample,song,podcast_file,i):
         podcast_chapter=podcast_file.get_podcast_in_chapters_list()
         self.combined_dictionary[podcast_chapter[i].title]=podcast_sample
+        self.combined_array.append({podcast_chapter[i].title:podcast_sample})
         for j in range(len(song)):
             self.combined_dictionary[song[j].get_song_name()]=song[j].get_songs()
+            self.combined_array.append({song[j].get_song_name():song[j].get_songs()})
 # get album art or other metadata for user friendly
         # length_before=len(self.combined_audio_file)
         # self.combined_audio_file=self.combined_audio_file+podcast_sample+self.total_music_list(song)
@@ -35,6 +38,8 @@ class Combined:
 #   Getters
     def get_combined_audio_file(self):
         return self.combined_dictionary
+    def get_combined_array(self):
+        return self.combined_array
 
 ######################################################################
 # '''manpulating Methods '''

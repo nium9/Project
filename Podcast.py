@@ -39,6 +39,8 @@ class podcast:
     def length(self):
         audiofile = eyed3.load(self.address)
         return audiofile.info.time_secs/60 # give time in minuets
+    def length_in_seconds(self):
+        return len(self.podcast_file)/1000
 #############################################################################
                         # Setters
     def set_slice_audio(self,sample):

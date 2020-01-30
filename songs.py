@@ -14,9 +14,13 @@ class songs:
         return self.Music
     def get_song_name(self):
         try:
-            return self.Music_metadata.tag.title
+            if self.Music_metadata.tag.title!=None:
+                return self.Music_metadata.tag.title
+            else:
+                return self.name
         except:
-            return self.address
+            print("ERROR " + self.name)
+            return self.name
     def set_new_song(self):
         self.name= str(random.choice(os.listdir("Data/Music/")))
         self.address= "Data/Music/"+self.name
@@ -33,7 +37,7 @@ class songs:
         except:
             print("Fail to use metadata")
             try:
-                return len(self.Music)/(1000*60)
+                return len(self.get_songs())/(1000*60)
             except:
                 print("ERROR fail to use song"+ self.address)
                 self.set_new_song()
