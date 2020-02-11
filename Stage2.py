@@ -20,11 +20,13 @@ Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '600')
 
 '''
+Need to DO:
+create a loading bar while pages loaded
+Also album art
+and change sizes
+############################################################
 may need to use threading
 it does play and stops audio AudioSegment the problem is pausing.
-need volume Button/ not necessary
-need progessbar
-need to show the length of track
 need to make a better layout
 '''
 class MenuPage(Widget):
@@ -38,13 +40,18 @@ class MenuPage(Widget):
         self.currently_playing=self.select_stream(self.index)
         self.event_play=Clock.schedule_once(self.placeholder,0)
     def update_value(self,song_value,dt):
-            self.ids.load_bar.value = ((self.ids.load_bar.value + (dt/(song_value)))*100)
+            self.ids.load_bar.value =self.ids.load_bar.value+ ((dt/song_value)*100)
             print("value of bar {} Value of song {}".format(self.ids.load_bar.value,song_value))
     def play_next_previous(self,skip_previous,type_of_skip,dt):
         #need to change button for play to go back to play when skipping a song
+        #if dt !=0:
+        #    self.event_progress_bar.cancel()
         if type_of_skip=='notNatual':
              self.event_play.cancel()
              self.event_progress_bar.cancel()
+        if type_of_skip=='natural':
+            self.event_play.cancel()
+            self.event_progress_bar.cancel()
         if self.index <=len(self.Stream) and self.index>=0:
             # self.event_play.cancel()
             if self.ids.instance.text=='Stop':
