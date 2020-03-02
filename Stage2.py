@@ -21,6 +21,16 @@ Config.set('graphics', 'height', '600')
 
 '''
 Need to DO:
+'''''''''''''''''
+'''
+need to fix the logic so it allows to skips song first time. 
+'''
+'''''''''''''''''
+
+
+
+
+
 create a loading bar while pages loaded
 Also album art
 and change sizes
@@ -63,9 +73,9 @@ class MenuPage(Widget):
             self.ids.song_name.text=self.get_details(self.index)
             self.currently_playing=self.select_stream(self.index)
             self.play()
-            print("the song is {} and the length in seconds is {}".format(self.get_details(self.index),len(self.currently_playing)))
             self.event_progress_bar=Clock.schedule_interval(partial(self.update_value,len(self.currently_playing)/1000),1)
             self.event_play=Clock.schedule_once(partial(self.play_next_previous,1,'natural'),len(self.currently_playing)/1000)
+            print("the song is {} and the length in seconds is {}".format(self.get_details(self.index),len(self.currently_playing)))
             # self.event_play()
             #self.playing=pydub.playback._play_with_simpleaudio(self.currently_playing)
     def plays_or_stop(self,instance):

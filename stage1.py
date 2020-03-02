@@ -79,21 +79,11 @@ class stage1:
 if __name__ == "__main__":
     s1=stage1()
     s1.save_file()
-    print("this kinda works but not working at the same time")
-    print("it is also taking too long to run so far on average 3min 30 seconds this is cause saving is tooooooooo long in memory is ok i think")
-    print("it manpulating the audio file but it hit and miss")
+
 ##############################################################
 '''
 Debugging puporses
 '''
-# def printChapter(chapter):
-#     print("== Chapter '%s'" % chapter.element_id)
-#     print("-- Title:", chapter.title)
-#     print("-- subtitle:", chapter.subtitle)
-#     print("-- Start time: %d; End time: %d" % chapter.times)
-#     print("-- Start offset: %s; End offset: %s" %
-#           tuple((str(o) for o in chapter.offsets)))
-#     print("-- Sub frames:", str(list(chapter.sub_frames.keys())))
 
 # def length_millseconds(audiofile):
 #     return print(audiofile.info.time_secs/1000)#gives length in seconds use 60 to get mins

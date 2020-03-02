@@ -18,6 +18,10 @@ class podcast:
         self.podcast_chapter=self.podcast_meta_data.tag.chapters
         self.chapter_array=[]
         self.podcast_slice=[]
+###############################################################
+
+
+
 ###########################################################
 #           Getters
     def getKey(self,item):
@@ -60,8 +64,16 @@ class podcast:
 
     def find_chapters(self):
         arr=[]
-        for chap in self.podcast_chapter:
-            arr.append(chap)
+        for chapter in self.podcast_chapter:
+            print("*"*80)
+            print("== Chapter '%s'" % chapter.element_id)
+            print("-- Title:", chapter.title)
+            print("-- subtitle:", chapter.subtitle)
+            print("-- Start time: %d; End time: %d" % chapter.times)
+            print("-- Start offset: %s; End offset: %s" %
+            tuple((str(o) for o in chapter.offsets)))
+            print("-- Sub frames:", str(list(chapter.sub_frames.keys())))
+            arr.append(chapter)
         arr=sorted(arr,key=self.getKey)
         self.chapter_array=self.gap_condition(arr)
 
