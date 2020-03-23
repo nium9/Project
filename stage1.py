@@ -24,9 +24,9 @@ Need to do:
 '''
 class stage1:
 ###################################################################################
-    def __init__(self):
+    def __init__(self,address,name):
         print("Running")
-        self.podcast_file = podcast()
+        self.podcast_file = podcast(address,name)
         self.podcast_file.find_chapters()
         #print_loop(podcast_file.get_podcast_in_chapters())
         self.podcast_file.slice_audio()
@@ -37,9 +37,9 @@ class stage1:
         print("-"*80)
         self.Stream=self.add_song(self.podcast_file)
         print(self.Stream.get_combined_audio_file())
-        print("Stream Ready")
-        print(self.Stream.get_combined_array())
-        print("the new array above does it work?")
+        #print("Stream Ready")
+        #print(self.Stream.get_combined_array())
+        #print("the new array above does it work?")
 ################################################################################
     def create_list_song(self):
         arr=[]
@@ -48,10 +48,10 @@ class stage1:
             try:
                 music=songs()
                 arr.append(music)
+                # print("Song Name {} - length - {}  " .format(music.get_song_name(),music.length()))
                 total=total+music.length()
             except:
                 music.set_new_song()
-                print(music.get_song_name())
                 arr[len(arr)-1]=music
                 total=total+music.length()
 
@@ -69,6 +69,8 @@ class stage1:
             # combined.set_chapter(arr[i],0,len(combined))
             # combined.set_chapter(create_list_song,0,len(combined)
         #print (combined.len())
+        for i in combined.get_combined_audio_file():
+            print ("{} : {}".format(i,combined.get_combined_audio_file()[i]))
         return combined
     def save_file(self):
         self.Stream.save()
@@ -77,8 +79,8 @@ class stage1:
     def get_length(self):
         return len(self.Stream)
 if __name__ == "__main__":
-    s1=stage1()
-    s1.save_file()
+    s1=stage1("data/Chapter_Works/","clockwise320.mp3")
+    # s1.save_file()
 
 ##############################################################
 '''

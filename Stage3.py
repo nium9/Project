@@ -14,160 +14,214 @@ them but the actual finding the gaps i need to do .
 use stage1 to help you ie change metadata
 ###
 '''
+from scipy import signal,spatial
+from scipy.spatial.distance import euclidean
 import datetime
-import pydub
+import eyed3
+from eyed3.id3.tag import Tag
 import numpy as np
 import librosa
 from scipy.io import wavfile as wav
-from scipy.fftpack import fft,rfft,irfft
-from scipy import signal,spatial
-from sklearn import preprocessing
-from math import sqrt
+from scipy.fftpack import fft,rfft,irfft,ifft
+from math import *
+from fastdtw import fastdtw
 
 # Data/Data_for_stage_3/Sample_of_hello_internet.wav
 #output.wav
 #18 seconds is begining
-def getData(podcast_array,sample):
+def getData(sample,Ad_placement_begin,Ad_placement_end):
     for a in range (0,len(sample)):
         address='Data/Data_for_stage_3/ChangeConvo/Sample' +str(sample[a])+'.wav'
         print(address)
         sample_data,sample_rate=librosa.load(address,sr=44100)
-        sample[a]=sample_data
-    for i in range(0,len(podcast_array)):
-        address='Data/Data_for_stage_3/'+str(podcast_array[i])+'.wav'
+        sample[a]=[sample_data,"DATA"]
+    for j in range(0,len(Ad_placement_begin)):
+        address='Data/Data_for_stage_3/Adplacement/begin_ad/Sample' +str(Ad_placement_begin[j])+".wav"
+        print(address)
+        Ad_placement_data,Ad_placement_rate=librosa.load(address,sr=44100)
+        Ad_placement_begin[j]=[Ad_placement_data,"AD_Begin"]
+    for i in range(0,len(Ad_placement_end)):
+        address='Data/Data_for_stage_3/Adplacement/end_ad/Sample'+str(Ad_placement_end[i])+'.wav'
         print(address)
         data,rate=librosa.load(address,sr=44100)
-        podcast_array[i]=data
-    return sample,podcast_array
+        Ad_placement_end[i]=[data,"AD_End"]
+    return sample+Ad_placement_begin+Ad_placement_end
 def get_time_of_hi(data):
     return round(data.size/44100)
 
 
-def Sliding_window(current_sample,j,podcast_data):
-    counter=0
+def Sliding_window(sample_array,podcast_data):
     time=[]
-    window_movement=44100 #move 1/10 second 441 => move 1/100 of a second
+    threshold=[0.1,0.3]
+    window_movement=441 #move 1/10 second 441 => move 1/100 of a second
     #window_size is fixed it whatever the sample size is
-    for i in range(current_sample.size,data.size,window_movement):
-        slice_audio=podcast_data[counter:i]
-        if len(slice_audio)==0:
-            break
-        HI_FTT=fft(slice_audio)
-        #need to do my on cross/auto correlation
-        #a=slice_audio*current_sample ##have to be non fft version
-        #highest_result=sum(rfft(a))
-        # print(HI_FTT.shape)
-        # print(current_sample.shape)
-        ###############
-        ## Normailize
-        #print((HI_FTT,current_sample))
-        #print("-"*80)
-        HI_FTT = (HI_FTT - np.mean(HI_FTT)) / (np.std(HI_FTT) * len(HI_FTT))
-        current_sample = (current_sample - np.mean(current_sample)) /  np.std(current_sample)
-        #print((HI_FTT,current_sample))
-        ###################
-        highest_result=np.correlate(HI_FTT, current_sample)[0]
-        #if highest_result>90:
-            #print(highest_result)
-        time.append(["Sample"+str(j+1),round(counter/44100),highest_result])
-
-
-        #### correolate
-        #highest_result=np.corrcoef(HI_FTT,current_sample,'valid')[0]
-        #print(highest_result)
-        ###################
-        #print(highest_result)
+    #sample array [[soundfile,"Convo"],[Soudfiles,"Ad"]]
+    for i in sample_array:
+        counter=0
+        current_sample=i[0]
+        current_sample_desc=i[1]
+        size_of_sample=current_sample.size
+        for j in range(size_of_sample,data.size,window_movement):
+            slice_audio=podcast_data[counter:j]
+            if len(slice_audio)==0:
+                break
+            HI_FTT=slice_audio
+            # HI_FTT = (HI_FTT - np.mean(HI_FTT)) / (np.std(HI_FTT) * len(HI_FTT))
+            # current_sample = (current_sample - np.mean(current_sample)) /  np.std(current_sample)
+            # highest_result=sqrt(sum(pow(a-b,2) for a, b in zip(current_sample, HI_FTT)))
+            # highest_result=np.correlate(HI_FTT, current_sample)[0] #cross corelation
+            highest_result=1- spatial.distance.cosine(HI_FTT,current_sample) #cosine simularity
+            # highest_result, path = fastdtw(current_sample, HI_FTT, dist=euclidean)
+            if current_sample_desc=="DATA":
+                if threshold[0]<highest_result: # 0.1 is threshold
+                    time.append([current_sample_desc,round(counter/44100),highest_result])
+            else:
+                if threshold[1]<highest_result:
+                    time.append([current_sample_desc,round(counter/44100),highest_result])
+            counter=counter+window_movement
+    return time
+        ########################################################################
+        # highest_result=signal.correlate(HI_FTT,current_sample,'valid','fft')[0]
         #r=np.corrcoef(HI_FTT,current_sample)
-        #print(len(highest_result))
         #max_index=np.argmax(highest_result)
         #highest_result=highest_result[max_index]
-        #print(highest_result)
-        #highest_result=sqrt(mean_squared_error(current_sample, (HI_FTT*current_sample)))
-        #highest_result=np.average(r)
-        #f,highest_result=signal.coherence(HI_FTT,current_sample)
-        #highest_result=sum(highest_result)
-        #highest_result , _=pearsonr(HI_FTT,current_sample)
-        #highest_result , _=spearmanr(HI_FTT,current_sample)
         #highest_result=np.inner(HI_FTT,current_sample)/(np.linalg.norm(HI_FTT)*(np.linalg.norm(current_sample))) # 0.076
-        #highest_result=1- spatial.distance.cosine(HI_FTT,current_sample) # 0.
-        #highest_result=sum(HI_FTT*current_sample)
-        #print(counter/44100)
-        #print(max_index)
-        #print(highest_result)
-        # ## so instead of doing correlate i should do the formula of correolate
-        # ifft( rfft(Hi) * rfft(sample) )
-        #result=(np.inner(slice_audio, current_sample)/(norm(slice_audio)*norm(current_sample)))
-        #time.append(["Sample"+str(j+1),round(counter/44100),highest_result])
-                    #sample             #timestamp      #result of correlate_for that second
-        #r=[]
-        counter=counter+window_movement
-    #print(time)
-    return time
-
+        ########################################################################
+def check_max(standerised,h,val):
+    #val=["Speach",coorelate_value]
+    if val[2] > standerised[h][1]:
+        if check_range(standerised,h,i)==True:
+            standerised[h][1]=val[2]
+            standerised[h][0]=val[0]
+        else:
+            return standerised
+    return standerised
+    
+    
+######################################################################################
+####################
+#                       NOT WORKING                           # 
+ 
+def check_range(standerised,time_stamp,val):
+    if time_stamp<=5 or time_stamp>=len(standerised):
+        return True
+    for i in range(time_stamp-3,time_stamp+3):
+        if standerised[i][1]==val[1]:
+            return False
+    return True
+    
+    
+################################################################################################
 def standarised_time(result,time_of_hi):
-    standarised=[0 for i in range(0,time_of_hi)]
+    standarised=[["Speach",0] for i in range(0,time_of_hi)]
     print(time_of_hi)
     counter=0
     for h in range(0,len(standarised)-1):
         for i in result:
-            for j in i:
-                if j[1]==h:
-                    counter=counter+1
-                    standarised[j[1]]+= (j[2])
-        if counter==0:
-            standarised[h]=0
-        else:
-            standarised[h]=standarised[h]/counter
-            counter=0
-    # for k in range (0,len(standarised)):
-    #     standarised[k]=standarised[k]/len(sample_fft)
+            # i= ["AD", timestamp, correlaton value]
+            if i[1]==h:
+                standarised=check_max(standarised,h,i)
     return standarised
-def main_loop(podcast_data,sample_fft):
-    result=[]
-    for j in range(0,len(sample_fft)):
-        current_sample=sample_fft[j]
-        result.append(Sliding_window(current_sample,j,podcast_data)) ## option 2 work kinda but not really
-        print("*"*80)
-        print("done sample " +str(j+1)+ " analysis" )
+def main_loop(podcast_data,sample):
+    # result=/[]
+    # for j in range(0,len(sample_fft)):
+        # current_sample=sample_fft[j][0]
+    result=Sliding_window(sample,podcast_data) ## option 2 work kinda but not really
+    # print(result)
+    print("*"*80)
+    print("done Analysis" )
     average_values=standarised_time(result,get_time_of_hi(podcast_data))
     print("*"*80)
+    # print(average_values)
+    # average_values=[[desc,cr],[],..... time of data]
     return average_values
 def print_data(average_values):
     a={}
     for k in range(0,len(average_values)):
         #print(str(datetime.timedelta(seconds=k)) + " "+ str(average_values[k]))
-        a[str(datetime.timedelta(seconds=k))]=average_values[k]
-    #print(a)
-    sorted_x = sorted(a.items(), key=lambda kv: kv[1],reverse = True)
+        # a[str(datetime.timedelta(seconds=k))]=average_values[k]
+        a[k]=average_values[k]
+    for i in a:
+        print("{} - {} ".format(i,a[i]))
+    print(a.items())
+    sorted_x = sorted(a.items(), key=lambda kv: (kv[1][0],kv[1][1]),reverse = True)
     count=0
     for i in sorted_x:
-        print(i)
+        print("time {} ,- Desc - {} , coorelate - {} ".format(str(datetime.timedelta(seconds=i[0])),i[1][0],i[1][1]))
         count=count+1
-        if count>5:
-            break
+            # break
+            # if count>9:
         print("*"*80)
+    return sorted_x
+data,rate = librosa.load('Data/Data_for_stage_3/135.mp3',sr=44100)
+# -1 <-> +1 the data is between
+#[2,5,6,7,8,9] sample
+#[2,3,4] begin_add
+#[2,3,4] end_add
+sample_of_all_data=getData([2,5],[2],[3])
+for i in sample_of_all_data:
+    print(i[0])
+    print(i[1])
+def set_chapter(list_of_timestamp):
+    tag=Tag()
+    previous=0
+    counter=int(0)
+    for i in list_of_timestamp:
+        tag.chapters.set("Chapter "+ str(counter), (previous*1000, i*1000))
+        previous=i*1000
+        counter+=1
+    return tag
+def printChapter(chapter):
+    print(chapter)
+    # The element ID is the unique key for this chapter
+    print("== Chapter '%s'" % chapter.element_id)
+    # TIT2 sub frame
+    print("-- Title:", chapter.title)
+    # TIT3 sub frame
+    print("-- Start time: %d; End time: %d" % chapter.times)
+    # Start and end offset - tuple. None is used to set to "no offset"
+    print("-- Start offset: %s; End offset: %s" %
+          tuple((str(o) for o in chapter.offsets)))
+    print("-- Sub frames:", str(list(chapter.sub_frames.keys())))
 
-'''
-ok what this need to do is train the samples?????
-or we can try and train and create a model use
-the podcast data and samples as features.
-'''
-# podcast_array= 129 130 131 132 134
-# sample =  #2 5 6 7 8 9 10 11
-data,rate = librosa.load('Data/Data_for_stage_3/Sample_of_hello_internet.wav',sr=44100)
-#sample, podcast_array=getData([129,130,131,132,134],[2,5,6,7,8,9])
-sample, podcast_array=getData([],[2,5,6,7,8,9])
-#sample=[preprocessing.normalize(i.reshape(-1,1)) for i in sample]
-sample_fft=[fft(sample[i]) for i in range(0,len(sample))]
-print(data)
-#data=preprocessing.normalize(data.reshape(-1,1))
-
-
-
-
-
-print(data.size)
+## sample of all data [["convo",sounfile],["ad",soundfile]]
 print("*"*80)
-print_data(main_loop(data,sample_fft))
+list_of_timestamp=print_data(main_loop(data,sample_of_all_data)) ## prodduced suppringly good result
+# list_of_timestamp=sorted(list_of_timestamp, key=lambda kv: (kv[0]),reverse = True)
+# temp=set_chapter(list_of_timestamp)
+metadata=eyed3.load("Data/Data_for_stage_3/135.mp3")
+for i in metadata.tag.chapters:
+    printChapter(i)
+'''
+DO CLASSIFICATION- filtering
+# OR MERGER SOUND FILES TOGETHER
+OR TRY FFT AGAIN AND SEE IF CANCEL
+'''
+'''
+hello internet wav edition:
+11:00
+30:42
+39:42
+43:00
+AD_placment :
+53:31 - 55:31
+23:57 - 26:04
+1:13:01- 1:14:53
 
-# ###################################################################################
+'''
+################################################################################
+    #                 counter=counter+1
+    #                 standarised[j[1]]= j[2]
+    #             highest=0
+    #     if counter==0:
+    #         standarised[h]=0
+    #     else:
+    #         standarised[h]=standarised[h]/counter
+    #         counter=0
+    # for k in range (0,len(standarised)):
+    #     standarised[k]=standarised[k]/len(sample_fft)
+################################################################################
+# sample_fft=[(fft(sample[i][0]),sample[i][1]) for i in range(0,len(sample))]
+# ad_placement_begin_fft=[(fft(ad_placement_array_begin[i][0]),ad_placement_array_begin[i][1]) for i in range(0,len(ad_placement_array_begin))]
+# ad_placement_end_fft=[(fft(ad_placement_array_end[i][0]),ad_placement_array_end[i][1]) for i in range(0,len(ad_placement_array_end))]
+# ##############################################################################

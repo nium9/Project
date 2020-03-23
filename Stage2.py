@@ -18,19 +18,7 @@ from functools import partial
 ########### prerequesites ##########################
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '600')
-
 '''
-Need to DO:
-'''''''''''''''''
-'''
-need to fix the logic so it allows to skips song first time. 
-'''
-'''''''''''''''''
-
-
-
-
-
 create a loading bar while pages loaded
 Also album art
 and change sizes
@@ -42,40 +30,34 @@ need to make a better layout
 class MenuPage(Widget):
     def __init__(self,**kwargs):
         super(MenuPage, self).__init__(**kwargs)
-        self.s1=stage1()
+        self.s1=stage1("data/Chapter_Works/","clockwise320.mp3")
         self.Stream=self.s1.get_stream().get_combined_audio_file()
-        self.current_value=0
         self.index=0
         self.ids.song_name.text=self.get_details(self.index)
         self.currently_playing=self.select_stream(self.index)
         self.event_play=Clock.schedule_once(self.placeholder,0)
+        self.event_progress_bar=Clock.schedule_interval(self.placeholder,0)
     def update_value(self,song_value,dt):
             self.ids.load_bar.value =self.ids.load_bar.value+ ((dt/song_value)*100)
             print("value of bar {} Value of song {}".format(self.ids.load_bar.value,song_value))
-    def play_next_previous(self,skip_previous,type_of_skip,dt):
-        #need to change button for play to go back to play when skipping a song
-        #if dt !=0:
-        #    self.event_progress_bar.cancel()
-        if type_of_skip=='notNatual':
-             self.event_play.cancel()
-             self.event_progress_bar.cancel()
-        if type_of_skip=='natural':
-            self.event_play.cancel()
-            self.event_progress_bar.cancel()
-        if self.index <=len(self.Stream) and self.index>=0:
+    def play_next_previous(self,skip_previous,dt):
+        self.event_play.cancel()
+        self.event_progress_bar.cancel()
+        if self.index+skip_previous<=len(self.Stream)-1 and self.index+skip_previous>=0:
             # self.event_play.cancel()
             if self.ids.instance.text=='Stop':
                 self.playing.stop()
             self.reset_bar()
             self.index=self.index+skip_previous
             self.ids.instance.text='Stop'
-            self.ids.instance.state='normal'
             self.ids.song_name.text=self.get_details(self.index)
             self.currently_playing=self.select_stream(self.index)
             self.play()
             self.event_progress_bar=Clock.schedule_interval(partial(self.update_value,len(self.currently_playing)/1000),1)
-            self.event_play=Clock.schedule_once(partial(self.play_next_previous,1,'natural'),len(self.currently_playing)/1000)
+            self.event_play=Clock.schedule_once(partial(self.play_next_previous,1),len(self.currently_playing)/1000)
             print("the song is {} and the length in seconds is {}".format(self.get_details(self.index),len(self.currently_playing)))
+        else:
+            self.event_play=Clock.schedule_once(partial(self.play_next_previous,0),len(self.currently_playing)/1000)
             # self.event_play()
             #self.playing=pydub.playback._play_with_simpleaudio(self.currently_playing)
     def plays_or_stop(self,instance):
@@ -85,7 +67,7 @@ class MenuPage(Widget):
             self.play()
             print("now playing " + self.get_details(self.index))
             self.event_progress_bar=Clock.schedule_interval(partial(self.update_value,len(self.currently_playing)/1000),1)
-            self.event_play=Clock.schedule_once(partial(self.play_next_previous,1,'natural'),len(self.currently_playing)/1000)
+            self.event_play=Clock.schedule_once(partial(self.play_next_previous,1),len(self.currently_playing)/1000)
         else:
             print("stop " + self.get_details(self.index))
             instance.text='Play'

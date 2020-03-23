@@ -4,15 +4,15 @@ import random
 import os
 from pydub.utils import which
 '''
-Need to use getter and setters.
-'''
+Prerequistes
 eyed3.log.setLevel("ERROR")
 pydub.AudioSegment.ffmpeg = r"/absolute/path/to/ffmpeg"
 pydub.AudioSegment.converter = which("ffmpeg")
+'''
 class podcast:
-    def __init__(self):
-        self.name= "clockwise320.mp3"
-        self.address= "data/Chapter_Works/"+self.name
+    def __init__(self,address,name):
+        self.name= name #"clockwise320.mp3"
+        self.address= address+self.name#"data/Chapter_Works/"+self.name
         self.podcast_file=pydub.AudioSegment.from_mp3(self.address)
         self.podcast_meta_data=eyed3.load(self.address)
         self.podcast_chapter=self.podcast_meta_data.tag.chapters
@@ -78,7 +78,6 @@ class podcast:
         self.chapter_array=self.gap_condition(arr)
 
     def slice_audio(self):
-        arr=[]
         podcast_file=self.get_podcast_file()
         for i in self.chapter_array:
             self.set_slice_audio(podcast_file[self.chapter_time_start(i):self.chapter_time_end(i)])
