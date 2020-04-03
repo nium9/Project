@@ -39,12 +39,12 @@ def getData(sample,Ad_placement_begin,Ad_placement_end):
         address='Data/Data_for_stage_3/Adplacement/begin_ad/Sample' +str(Ad_placement_begin[j])+".wav"
         print(address)
         Ad_placement_data,Ad_placement_rate=librosa.load(address,sr=44100)
-        Ad_placement_begin[j]=[Ad_placement_data,"AD_Begin"]
+        Ad_placement_begin[j]=[Ad_placement_data,"AD"]
     for i in range(0,len(Ad_placement_end)):
         address='Data/Data_for_stage_3/Adplacement/end_ad/Sample'+str(Ad_placement_end[i])+'.wav'
         print(address)
         data,rate=librosa.load(address,sr=44100)
-        Ad_placement_end[i]=[data,"AD_End"]
+        Ad_placement_end[i]=[data,"AD"]
     return sample+Ad_placement_begin+Ad_placement_end
 def get_time_of_hi(data):
     return round(data.size/44100)
@@ -52,7 +52,7 @@ def get_time_of_hi(data):
 
 def Sliding_window(sample_array,podcast_data):
     time=[]
-    threshold=[0.1,0.3]
+    threshold=[0.1,0.3] # 0.1 , 0.3
     window_movement=441 #move 1/10 second 441 => move 1/100 of a second
     #window_size is fixed it whatever the sample size is
     #sample array [[soundfile,"Convo"],[Soudfiles,"Ad"]]
@@ -88,29 +88,32 @@ def Sliding_window(sample_array,podcast_data):
         #highest_result=np.inner(HI_FTT,current_sample)/(np.linalg.norm(HI_FTT)*(np.linalg.norm(current_sample))) # 0.076
         ########################################################################
 def check_max(standerised,h,val):
-    #val=["Speach",coorelate_value]
+    #standarised=[ ["Speach",coorelate_value] ]
+    #val= ["AD", timestamp, correlaton value]
+    print(val)
     if val[2] > standerised[h][1]:
-        if check_range(standerised,h,i)==True:
+        if check_range(standerised,h,val)==True:
             standerised[h][1]=val[2]
             standerised[h][0]=val[0]
         else:
             return standerised
     return standerised
-    
-    
+
+
 ######################################################################################
 ####################
-#                       NOT WORKING                           # 
- 
+#                       NOT WORKING                           #
+
 def check_range(standerised,time_stamp,val):
     if time_stamp<=5 or time_stamp>=len(standerised):
-        return True
-    for i in range(time_stamp-3,time_stamp+3):
-        if standerised[i][1]==val[1]:
-            return False
+        return False
+    else:
+        for i in range(time_stamp-3,time_stamp+3):
+            if standerised[i][0]==val[0]:
+                return False
     return True
-    
-    
+
+
 ################################################################################################
 def standarised_time(result,time_of_hi):
     standarised=[["Speach",0] for i in range(0,time_of_hi)]
@@ -123,13 +126,10 @@ def standarised_time(result,time_of_hi):
                 standarised=check_max(standarised,h,i)
     return standarised
 def main_loop(podcast_data,sample):
-    # result=/[]
-    # for j in range(0,len(sample_fft)):
-        # current_sample=sample_fft[j][0]
     result=Sliding_window(sample,podcast_data) ## option 2 work kinda but not really
-    # print(result)
     print("*"*80)
     print("done Analysis" )
+    print(result)
     average_values=standarised_time(result,get_time_of_hi(podcast_data))
     print("*"*80)
     # print(average_values)
@@ -137,21 +137,24 @@ def main_loop(podcast_data,sample):
     return average_values
 def print_data(average_values):
     a={}
+    print (average_values)
     for k in range(0,len(average_values)):
         #print(str(datetime.timedelta(seconds=k)) + " "+ str(average_values[k]))
         # a[str(datetime.timedelta(seconds=k))]=average_values[k]
         a[k]=average_values[k]
     for i in a:
-        print("{} - {} ".format(i,a[i]))
-    print(a.items())
+        print("{} - {} ".format(str(datetime.timedelta(seconds=i)),a[i]))
+        # break
+    # print(a.items())
     sorted_x = sorted(a.items(), key=lambda kv: (kv[1][0],kv[1][1]),reverse = True)
     count=0
     for i in sorted_x:
         print("time {} ,- Desc - {} , coorelate - {} ".format(str(datetime.timedelta(seconds=i[0])),i[1][0],i[1][1]))
-        count=count+1
+        # count=count+1
             # break
             # if count>9:
         print("*"*80)
+        # break
     return sorted_x
 data,rate = librosa.load('Data/Data_for_stage_3/135.mp3',sr=44100)
 # -1 <-> +1 the data is between

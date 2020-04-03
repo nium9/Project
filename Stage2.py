@@ -19,7 +19,11 @@ from functools import partial
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '600')
 '''
-create a loading bar while pages loaded
+IMAGES = audiofile.tag.images
+
+for IMAGE in IMAGES:
+if IMAGE.picture_type == FRONT_COVER:
+IMAGE.image_data
 Also album art
 and change sizes
 ############################################################
@@ -94,6 +98,9 @@ class MenuPage(Widget):
         return list(self.Stream.keys())[i]
     def get_index(self):
         return self.index
+    def get_image(self):
+        self.s1=stage1("data/Chapter_Works/","clockwise320.mp3")
+        return self.s1.podcast_file.get_album_art()
 #####################################################################
 class MyApp(App):
     def build(self):

@@ -10,6 +10,15 @@ pydub.AudioSegment.converter = which("ffmpeg")
 class songs:
     def __init__(self):
         self.set_new_song()
+        self.album_art=self.get_album_art()
+###############################################################
+    def get_album_art(self):
+        IMAGES = self.Music_metadata.tag.images
+        for IMAGE in IMAGES:
+            if IMAGE.picture_type!= None:
+                print (IMAGE.makeFileName())
+                #Image.image_data
+                return IMAGE.mime_type 
     def get_songs(self):
         return self.Music
     def get_song_name(self):
