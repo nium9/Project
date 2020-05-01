@@ -28,6 +28,7 @@ class stage1:
         print("Running")
         self.podcast_file = podcast(address,name)
         self.podcast_file.find_chapters()
+        print(self.podcast_file.podcast_chapter)
         #print_loop(podcast_file.get_podcast_in_chapters())
         self.podcast_file.slice_audio()
         print("podcast loaded and chapters ready")

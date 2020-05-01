@@ -19,7 +19,11 @@ from functools import partial
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '600')
 '''
-create a loading bar while pages loaded
+IMAGES = audiofile.tag.images
+
+for IMAGE in IMAGES:
+if IMAGE.picture_type == FRONT_COVER:
+IMAGE.image_data
 Also album art
 and change sizes
 ############################################################
@@ -31,6 +35,7 @@ class MenuPage(Widget):
     def __init__(self,**kwargs):
         super(MenuPage, self).__init__(**kwargs)
         self.s1=stage1("data/Chapter_Works/","clockwise320.mp3")
+        self.get_image()
         self.Stream=self.s1.get_stream().get_combined_audio_file()
         self.index=0
         self.ids.song_name.text=self.get_details(self.index)
@@ -94,6 +99,15 @@ class MenuPage(Widget):
         return list(self.Stream.keys())[i]
     def get_index(self):
         return self.index
+    def get_image(self):
+        # self.s1=stage1("data/Chapter_Works/","clockwise320.mp3")
+        import io
+        from kivy.core.image import Image as CoreImage
+        # imgio=io.BytesIO()
+        # data = io.BytesIO(self.s1.podcast_file.get_album_art())
+        im = CoreImage(self.s1.podcast_file.get_album_art(),ext="jpg").texture
+        self.ids.img.texture=im
+        self.ids.img.reload()
 #####################################################################
 class MyApp(App):
     def build(self):

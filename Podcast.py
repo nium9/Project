@@ -18,8 +18,14 @@ class podcast:
         self.podcast_chapter=self.podcast_meta_data.tag.chapters
         self.chapter_array=[]
         self.podcast_slice=[]
+        self.album_art=self.get_album_art()
 ###############################################################
-
+    def get_album_art(self):
+        IMAGES = self.podcast_meta_data.tag.images
+        for IMAGE in IMAGES:
+            if IMAGE.picture_type!= None:
+                # print (IMAGE.image_data)
+                return IMAGE.image_data
 
 
 ###########################################################
