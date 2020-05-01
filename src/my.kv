@@ -1,0 +1,38 @@
+<MenuPage>:
+    BoxLayout:
+        size: root.size
+        BoxLayout:
+            orientation:'vertical'
+            rows:4
+            Image:
+                id:img
+                source:' '
+
+                # source:'Data/Chapter_Works/clockwise320.mp3/image/FRONT_COVER.jpg'
+                # source: root.get_image()
+                size: 1,1
+            Label:
+                text:'0'
+                text_size: self.width, None
+                size_hint: 1, None
+                height: self.texture_size[1]
+                id:song_name
+            ProgressBar:
+		        id: load_bar
+		        max: 100# i think to set max
+		        value: 0
+            GridLayout:
+                cols:3
+                Button:
+                    text:'Previous'
+                    on_press:root.play_next_previous(-1,0)
+                    size: 75, 50
+                Button:
+                    id:instance
+                    text:'Play'
+                    on_press:root.plays_or_stop(self)
+                    size: 75, 50
+                Button:
+                    text:'Next'
+                    on_press:root.play_next_previous(1,0)
+                    size: 75, 50
